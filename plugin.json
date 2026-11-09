@@ -1,0 +1,130 @@
+{
+  "name": "mcp-web-search",
+  "version": "1.0.0",
+  "description": "MCP server providing privacy-respecting web search via SearXNG/DuckDuckGo for DeepSeek Harness",
+  "author": "DeepSeek Harness Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deepseek-ai/mcp-web-search"
+  },
+  "keywords": [
+    "mcp",
+    "web-search",
+    "searxng",
+    "duckduckgo",
+    "privacy",
+    "deepseek-harness"
+  ],
+  "mcp": {
+    "serverName": "web_search",
+    "transport": "stdio",
+    "command": "python",
+    "args": ["-m", "search_plugin"],
+    "cwd": "${workspace}/mcp-web-search",
+    "env": {
+      "PATH": "/usr/local/bin:/usr/bin:/bin"
+    },
+    "toolCallTimeoutMs": 60000,
+    "startupTimeoutMs": 15000,
+    "maxInstructionBytes": 32768,
+    "failOnStartupError": false,
+    "reconnect": {
+      "enabled": true,
+      "initialDelayMs": 500,
+      "maxDelayMs": 30000,
+      "maxAttempts": 10
+    }
+  },
+  "configuration": {
+    "backend": {
+      "type": "string",
+      "enum": ["searxng", "duckduckgo"],
+      "default": "searxng",
+      "description": "Search backend to use"
+    },
+    "searxng_instances": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" },
+      "default": [
+        "https://searx.be",
+        "https://search.bus-hit.me",
+        "https://searx.tiekoetter.com",
+        "https://searx.thegpm.org",
+        "https://search.projectsegfau.lt"
+      ],
+      "description": "List of SearXNG instance URLs"
+    },
+    "max_results": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "default": 10,
+      "description": "Default maximum results per search"
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 120,
+      "default": 30,
+      "description": "Request timeout in seconds"
+    },
+    "safe_search": {
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "default": 1,
+      "description": "Safe search level: 0=none, 1=moderate, 2=strict"
+    },
+    "categories": {
+      "type": "string",
+      "default": "general",
+      "description": "Search categories (comma-separated)"
+    },
+    "language": {
+      "type": "string",
+      "default": "auto",
+      "description": "Search language (ISO code or 'auto')"
+    },
+    "time_range": {
+      "type": "string",
+      "enum": ["", "day", "week", "month", "year"],
+      "default": "",
+      "description": "Time range filter"
+    }
+  },
+  "tools": [
+    {
+      "name": "web_search",
+      "description": "Search the web using privacy-respecting engines (SearXNG/DuckDuckGo)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query string"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "Maximum number of results to return (1-50)",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 10
+          },
+          "backend": {
+            "type": "string",
+            "description": "Search backend to use",
+            "enum": ["searxng", "duckduckgo"],
+            "default": "searxng"
+          },
+          "output_format": {
+            "type": "string",
+            "description": "Output format for results",
+            "enum": ["markdown", "json"],
+            "default": "markdown"
+          }
+        },
+        "required": ["query"]
+      }
+    }
+  ]
+}
